@@ -154,7 +154,7 @@ const UserDashboard = ({ user, onLogout }) => {
         )}
         <div style={modernStyles.logoSection}>
           <div style={modernStyles.logoIcon}>🏦</div>
-          <h2 style={modernStyles.logoText}>Loyal Bank Test</h2>
+          <h2 style={modernStyles.logoText}>Loyal Bank</h2>
         </div>
 
         <nav style={modernStyles.nav}>
