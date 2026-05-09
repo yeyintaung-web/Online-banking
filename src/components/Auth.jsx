@@ -6,6 +6,18 @@ const Auth = ({ onAuthSuccess }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  React.useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 600;
+  const isTablet = windowWidth < 1000;
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -25,6 +37,17 @@ const Auth = ({ onAuthSuccess }) => {
     const state_province = e.target.state_province ? e.target.state_province.value : '';
     const zip_postal_code = e.target.zip_postal_code ? e.target.zip_postal_code.value : '';
     const country = e.target.country ? e.target.country.value : '';
+    const confirmPassword = e.target.confirm_password ? e.target.confirm_password.value : '';
+
+    // Registration Validation
+    if (!isLogin) {
+      // Password matching check
+      if (password !== confirmPassword) {
+        setError('Passwords do not match. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+    }
 
     // Age validation for Registration
     if (!isLogin && dob) {
@@ -43,21 +66,21 @@ const Auth = ({ onAuthSuccess }) => {
     }
 
     const endpoint = isLogin ? '/api/login' : '/api/register';
-    const payload = isLogin 
-      ? { email, password } 
-      : { 
-          email, 
-          full_name: fullName, 
-          password, 
-          national_id: nationalId, 
-          date_of_birth: dob,
-          phone_number,
-          address_line1,
-          city,
-          state_province,
-          zip_postal_code,
-          country
-        };
+    const payload = isLogin
+      ? { email, password }
+      : {
+        email,
+        full_name: fullName,
+        password,
+        national_id: nationalId,
+        date_of_birth: dob,
+        phone_number,
+        address_line1,
+        city,
+        state_province,
+        zip_postal_code,
+        country
+      };
 
     try {
       const response = await fetch(endpoint, {
@@ -94,8 +117,12 @@ const Auth = ({ onAuthSuccess }) => {
         <span style={styles.logoIconLarge}>🏦</span>
         <h1 style={styles.logoTitleLarge}>Loyal Bank</h1>
       </div>
-      
-      <div style={{...styles.authCard, ...(isLogin ? {} : styles.authCardWide)}}>
+
+      <div style={{
+        ...styles.authCard,
+        ...(isLogin ? {} : styles.authCardWide),
+        ...(isTablet ? { maxWidth: '95%', padding: isMobile ? '1.5rem' : '2rem' } : {})
+      }}>
         <h2 style={styles.title}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
         <p style={styles.subtitle}>
           {isLogin ? 'Login to your Loyal Bank account' : 'Join Loyal Bank today'}
@@ -104,26 +131,30 @@ const Auth = ({ onAuthSuccess }) => {
         <form onSubmit={handleAuth} style={styles.form}>
           {successMessage && <div style={styles.successMessage}>{successMessage}</div>}
           {error && <div style={styles.errorMessage}>{error}</div>}
-          
-          <div style={isLogin ? styles.form : styles.formGrid}>
+
+          <div style={isLogin ? styles.form : {
+            ...styles.formGrid,
+            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '1fr 1fr' : '1fr 1fr 1fr'),
+            gap: isMobile ? '1rem' : '1.25rem 1.5rem'
+          }}>
             <div style={styles.inputGroup}>
-                <label style={styles.label}>Email Address</label>
-                <input 
-                  name="email" 
-                  type="email" 
-                  placeholder="john.doe@example.com" 
-                  required 
-                  style={styles.input}
-                />
+              <label style={styles.label}>Email Address</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="john.doe@example.com"
+                required
+                style={styles.input}
+              />
             </div>
 
             {!isLogin && (
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Full Name</label>
-                <input 
+                <input
                   name="full_name"
-                  type="text" 
-                  placeholder="User" 
+                  type="text"
+                  placeholder="User"
                   required
                   style={styles.input}
                 />
@@ -133,10 +164,10 @@ const Auth = ({ onAuthSuccess }) => {
             {!isLogin && (
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Phone Number</label>
-                <input 
+                <input
                   name="phone_number"
-                  type="tel" 
-                  placeholder="09********" 
+                  type="tel"
+                  placeholder="09********"
                   required
                   maxLength="11"
                   onInput={(e) => {
@@ -151,19 +182,19 @@ const Auth = ({ onAuthSuccess }) => {
               <>
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Date of Birth</label>
-                  <input 
+                  <input
                     name="dob"
-                    type="date" 
+                    type="date"
                     required
                     style={styles.input}
                   />
                 </div>
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>National ID Number (6 Digits)</label>
-                  <input 
+                  <input
                     name="nationalId"
-                    type="text" 
-                    placeholder="XXX-XXX" 
+                    type="text"
+                    placeholder="XXX-XXX"
                     pattern="\d{6}"
                     maxLength="6"
                     required
@@ -172,20 +203,20 @@ const Auth = ({ onAuthSuccess }) => {
                 </div>
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Address Line 1</label>
-                  <input 
+                  <input
                     name="address_line1"
-                    type="text" 
-                    placeholder="123 Main St" 
+                    type="text"
+                    placeholder="123 Main St"
                     required
                     style={styles.input}
                   />
                 </div>
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>City</label>
-                  <input 
+                  <input
                     name="city"
-                    type="text" 
-                    placeholder="Anytown" 
+                    type="text"
+                    placeholder="Anytown"
                     required
                     style={styles.input}
                   />
@@ -201,10 +232,10 @@ const Auth = ({ onAuthSuccess }) => {
                 </div>
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Zip/Postal Code</label>
-                  <input 
+                  <input
                     name="zip_postal_code"
-                    type="text" 
-                    placeholder="12345" 
+                    type="text"
+                    placeholder="12345"
                     required
                     style={styles.input}
                   />
@@ -223,18 +254,55 @@ const Auth = ({ onAuthSuccess }) => {
 
             <div style={styles.inputGroup}>
               <label style={styles.label}>Password</label>
-              <input 
-                name="password"
-                type="password" 
-                placeholder="••••••••" 
-                required
-                style={styles.input}
-              />
+              <div style={styles.passwordWrapper}>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  style={styles.input}
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  {showPassword ? (
+                    <i className="fa-solid fa-eye-slash"></i>
+                  ) : (
+                    <i className="fa-regular fa-eye"></i>
+                  )}
+                </span>
+              </div>
             </div>
+
+            {!isLogin && (
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Confirm Password</label>
+                <div style={styles.passwordWrapper}>
+                  <input
+                    name="confirm_password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    required
+                    style={styles.input}
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    {showConfirmPassword ? (
+                      <i className="fa-solid fa-eye-slash"></i>
+                    ) : (
+                      <i className="fa-regular fa-eye"></i>
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...styles.primaryButton,
               opacity: isLoading ? 0.7 : 1,

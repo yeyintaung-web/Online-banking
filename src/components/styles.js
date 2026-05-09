@@ -119,6 +119,26 @@ export const styles = {
     fontSize: '1rem',
     outline: 'none',
     transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  passwordWrapper: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: '1.25rem',
+    cursor: 'pointer',
+    color: '#666',
+    fontSize: '1.1rem',
+    userSelect: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    padding: '0 5px'
   },
   primaryButton: {
     marginTop: '0.5rem',
