@@ -29,11 +29,21 @@ const UserDashboard = ({ user, onLogout }) => {
 
   const updateStatus = (newStatus) => {
     setCurrentStatus(newStatus);
+    if (newStatus === 'Declined') {
+      onLogout();
+    }
   };
 
   const fetchDetails = async () => {
     try {
       const response = await fetch(`/api/user/details/${user.id}`);
+      
+      // If the account was deleted (Declined) or any error occurs, kick the user out
+      if (!response.ok) {
+        onLogout();
+        return;
+      }
+
       const data = await response.json();
       setBankingDetails(data);
       if (data.status) updateStatus(data.status);
